@@ -1,0 +1,14 @@
+[
+  {
+    "name": "inspire",
+    "path": "/inspire",
+    "component": "/Users/miurashiho/Desktop/Projects/private/covid19-miyagi/pages/inspire.vue",
+    "chunkName": "pages/inspire"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/Users/miurashiho/Desktop/Projects/private/covid19-miyagi/pages/index.vue",
+    "chunkName": "pages/index"
+  }
+]
