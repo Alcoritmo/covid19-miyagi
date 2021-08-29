@@ -5,15 +5,20 @@ use Tightenco\Collect\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as Xlsx;
 
 # PCR検査数＋陽性者数
-$summaries = setSummaryJson();
+$summaries = setInspectionJson();
 
 # 患者状況(日付・市町村・年代)
 //$patients = setPatientJson();
 
-file_put_contents(__DIR__.'/../data/summaries.json', json_encode($summaries, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
+file_put_contents(__DIR__.'/../data/inspection.json', json_encode($summaries, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
 //file_put_contents(__DIR__.'/../data/patients.json', json_encode($patients, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
 
-function setSummaryJson(): array
+/*
+ * PCR検査人数＋陽性者人数の配列を作成
+ *
+ * @return array
+ */
+function setInspectionJson(): array
 {
     $data = xlsxToArray(__DIR__.'/downloads/m-covid-kensa.xlsx', 'PCR検査(件数詳細) ', 'A10:E371', 'A9:E9');
     return [
@@ -49,11 +54,11 @@ function setPatientJson() {
 /*
  * Excelファイルを一行ずつ読み込みCollectionに格納
  *
- * @param string $path
- * @param string $sheet_name
- * @param string $range
- * @param string|null $header_range
- * @return Collection $data
+ * @param string $path ファイル名
+ * @param string $sheet_name シート名
+ * @param string $range データ部の範囲
+ * @param string|null $header_range ヘッダー部の範囲
+ * @return Collection $data ExcelデータをCollectionで整形した結果
  */
 function xlsxToArray(string $path, string $sheet_name, string $range, $header_range = null): Collection
 {
