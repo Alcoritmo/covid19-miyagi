@@ -35,10 +35,10 @@ function setInspectionJson(): array
             return $rowDate->lt($today);
         })->map(function ($row) {
             $date =  explode("日", Carbon::today()->year."-".str_replace('月', '-', $row['日付']));
-            $arrayDate = explode("-", $date[0]);
+            $rowDate = explode("-", $date[0]);
 
             return [
-                "date" => Carbon::create($arrayDate[0], $arrayDate[1], $arrayDate[2])->format('Y-m-d'),
+                "date" => Carbon::create($rowDate[0], $rowDate[1], $rowDate[2])->format('Y-m-d'),
                 "week_count" => $row["週数"],
                 "inspection_count" => str_replace([',', ' '], '', $row["検査件数"]),
                 "positive_person_count" => str_replace([',', ' '], '', $row["陽性数"])
