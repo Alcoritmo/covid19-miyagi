@@ -1,37 +1,30 @@
 <?php
-include('./vendor/autoload.php');
-use phpoffi\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
+require __DIR__.'/vendor/autoload.php';
 use Carbon\Carbon;
 use Tightenco\Collect\Support\Collection;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx as Xlsx;
 
 # PCR検査数＋陽性者数
 $summaries = setSummaryJson();
 
 # 患者状況(日付・市町村・年代)
-$patients = setPatientJson();
+//$patients = setPatientJson();
 
 file_put_contents(__DIR__.'/../data/summaries.json', json_encode($summaries, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
-file_put_contents(__DIR__.'/../data/patients.json', json_encode($patients, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
+//file_put_contents(__DIR__.'/../data/patients.json', json_encode($patients, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
 
 function setSummaryJson() {
-    $data = xlsxToArray(__DIR__.'/downloads/コールセンター相談件数-RAW.xlsx', 'Sheet1', 'A2:E100', 'A1:E1');
+    $data = xlsxToArray(__DIR__.'/downloads/m-covid-kensa.xlsx', 'PCR検査(件数詳細) ', 'A10:E500', 'A9:E9');
     return [
-        'date' => xlsxToArray(__DIR__.'/downloads/コールセンター相談件数-RAW.xlsx', 'Sheet1', 'H1')[0][0],
-        'data' => $data->filter(function ($row) {
-            return $row['曜日'] && $row['17-21時'];
-        })->map(function ($row) {
-            $date = '2020-'.str_replace(['月', '日'], ['-', ''], $row['日付']);
-            $carbon = Carbon::parse($date);
-            $row['日付'] = $carbon->format('Y-m-d').'T08:00:00.000Z';
-            $row['date'] = $carbon->format('Y-m-d');
-            $row['w'] = $carbon->format('w');
-            $row['short_date'] = $carbon->format('m/d');
-            $row['小計'] = array_sum([
-                $row['9-13時'] ?? 0,
-                $row['13-17時'] ?? 0,
-                $row['17-21時'] ?? 0,
-            ]);
-            return $row;
+        'date' => Carbon::today()->format('Y-m-d'),
+        'data' => $data->map(function ($row) {
+            $date = Carbon::today()->year." ".str_replace(['月', '日'], ['-', ''], $row['日付']);
+            return [
+                "date" => Carbon::parse($date),
+                "week_count" => $row["週数"],
+                "inspection_count" => $row["検査件数"],
+                "positive_person_count" => $row["陽性数"]
+            ];
         })
     ];
 }
@@ -51,7 +44,7 @@ function setPatientJson() {
  */
 function xlsxToArray(string $path, string $sheet_name, string $range, $header_range = null): Collection
 {
-    $reader = new XlsxReader();
+    $reader = new Xlsx();
     $spreadsheet = $reader->load($path);
     $sheet = $spreadsheet->getSheetByName($sheet_name);
     $data =  new Collection($sheet->rangeToArray($range));
